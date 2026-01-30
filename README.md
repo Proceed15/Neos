@@ -47,8 +47,11 @@ flowchart TD
     C -->|Contexto + Prompt| E[Google Gemini API]
     E -->|Resposta Gerada| C
     C -->|gTTS| F[Resposta em Áudio]
-
+```
 
 ## Link
 
 Link: 
+
+
+
