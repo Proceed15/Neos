@@ -1,0 +1,6 @@
+google-generativeai
+pandas
+SpeechRecognition
+gTTS
+playsound==1.2.2
+pyaudio
