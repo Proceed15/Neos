@@ -6,7 +6,6 @@ import speech_recognition as sr
 import google.generativeai as genai
 from gtts import gTTS
 from playsound import playsound
-from datetime import datetime
 
 # --- CONFIGURAÇÃO E CONSTANTES ---
 # Insira sua chave da Google AI Studio aqui
@@ -25,26 +24,39 @@ generation_config = {
 # --- CARREGAMENTO DA BASE DE CONHECIMENTO (RAG) ---
 def carregar_contexto():
     """
-    Carrega os dados locais (JSON/CSV) para compor a memória do agente.
+    Carrega os dados da pasta 'data/' para compor a memória do agente.
     """
     try:
-        # Carregamento do Perfil do Investidor
-        with open('perfil_investidor.json', 'r', encoding='utf-8') as f:
-            perfil = json.load(f)
+        # Caminhos dos arquivos (agora apontando para a pasta data)
+        path_perfil = os.path.join('data', 'perfil_investidor.json')
+        path_produtos = os.path.join('data', 'produtos_financeiros.json')
+        path_transacoes = os.path.join('data', 'transacoes.csv')
+
+        # Carregamento do Perfil
+        if os.path.exists(path_perfil):
+            with open(path_perfil, 'r', encoding='utf-8') as f:
+                perfil = json.load(f)
+        else:
+            print(f"Erro: Arquivo {path_perfil} não encontrado.")
+            sys.exit(1)
         
-        # Carregamento dos Produtos Financeiros
-        with open('produtos_financeiros.json', 'r', encoding='utf-8') as f:
-            produtos = json.load(f)
+        # Carregamento dos Produtos
+        if os.path.exists(path_produtos):
+            with open(path_produtos, 'r', encoding='utf-8') as f:
+                produtos = json.load(f)
+        else:
+            print(f"Erro: Arquivo {path_produtos} não encontrado.")
+            sys.exit(1)
             
-        # Carregamento do Histórico de Transações
-        if os.path.exists('transacoes.csv'):
-            df_transacoes = pd.read_csv('transacoes.csv')
-            # Converte para string formatada para economia de tokens e legibilidade
+        # Carregamento das Transações
+        if os.path.exists(path_transacoes):
+            df_transacoes = pd.read_csv(path_transacoes)
             transacoes = df_transacoes.to_string(index=False)
         else:
             transacoes = "Histórico de transações não disponível."
             
         return perfil, produtos, transacoes
+
     except Exception as e:
         print(f"Erro crítico ao carregar base de dados: {e}")
         sys.exit(1)
@@ -93,7 +105,6 @@ def texto_para_audio(mensagem):
     """Gera áudio a partir da resposta do agente."""
     arquivo_audio = 'response.mp3'
     
-    # Limpeza preventiva de arquivos temporários
     if os.path.exists(arquivo_audio):
         try:
             os.remove(arquivo_audio)
@@ -143,7 +154,7 @@ def processar_interacao(entrada_usuario):
     try:
         print("Processando resposta...")
         response = chat_session.send_message(entrada_usuario)
-        texto_resposta = response.text.replace("*", "") # Remove formatação markdown para áudio limpo
+        texto_resposta = response.text.replace("*", "") 
         
         print(f">> Neos: {texto_resposta}")
         texto_para_audio(texto_resposta)
@@ -166,8 +177,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
 
